@@ -1,4 +1,4 @@
-=ProtectedFields
+h1. AppModel protected fields
 
 This is an AppModel for your CakePHP applications that provides functionality of protected fields.
 
@@ -6,30 +6,36 @@ A protected field can't be set via multi-assignment (assigning multiple fields a
 
 You define which fields you want to protect in your model definition:
 
-class Article extends AppModel {
-  var $protectedFields = array(
-    'user_id'
-  );
-}
+<pre>
+  class Article extends AppModel {
+    var $protectedFields = array(
+      'user_id'
+    );
+  }
+</pre>
 
 Then you don't need to worry about user_id field being changed by malicious request. For example, you can safely do this in your controller:
 
-class ArticlesController extends AppController {
-  function edit($id) {
-    $this->Article->read(null, $id);
-    $this->Article->set($this->data);
-    $this->Article->save();
+<pre>
+  class ArticlesController extends AppController {
+    function edit($id) {
+      $this->Article->read(null, $id);
+      $this->Article->set($this->data);
+      $this->Article->save();
+    }
   }
-}
+</pre>
 
 When you assign multiple fields (an array of fields) at once via $this->set, protected fields are automatically filtered out. They can only be set directly:
 
-$this->Article->set('user_id', 1);
+<pre>
+  $this->Article->set('user_id', 1);
+</pre>
 
 Protected fields are also filtered out when you pass multiple records to set() in order to save them all at once with saveAll(). 
 
 Associated models are also protected. Check included tests for possible scenarios.
 
-==Copyright
+h2. Copyright
 
-Copyright (c) 2008 Michal Szajbe (http://codetunes.com) and netguru (http://netguru.pl), released under the MIT license
+Copyright (c) 2008 Michał Szajbe (http://codetunes.com) and netguru (http://netguru.pl), released under the MIT license.
