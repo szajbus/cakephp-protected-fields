@@ -13,33 +13,58 @@
 class AppModel extends Model {
   
   var $protectedFields = array();
+  
+  function create($data = array(), $filterKey = false) {
+		$defaults = array();
+		$this->id = false;
+		$this->data = array();
+		$this->__exists = null;
+		$this->validationErrors = array();
 
-  function set($one, $two = null) {
-    if (!$one) {
-			return;
-		}
-		if (is_object($one)) {
-			$one = Set::reverse($one);
-		}
-
-		if (is_array($one)) {
-		  if (empty($one[$this->alias])) {
-				if ($this->getAssociated(key($one)) === null) {
-					$one = array($this->alias => $one);
+		if ($data !== null && $data !== false) {
+			foreach ($this->schema() as $field => $properties) {
+				if ($this->primaryKey !== $field && isset($properties['default'])) {
+					$defaults[$field] = $properties['default'];
 				}
 			}
-			foreach ($one as $alias => $data) {
-			  if ($alias == $this->alias) {
-			    $one[$alias] = $this->filterProtectedFields($data);
-			  } else {
-  			  $associated = $this->getAssociated($alias);
-  			  if (!empty($associated)) {
-  			    $model = $associated['className'];
-  			    $one[$alias] = $this->$model->filterProtectedFields($data);
-  			  }
-			  }
-			}
+			$this->set(Set::filter($defaults), null, false);
+			$this->set($data);
 		}
+		if ($filterKey) {
+			$this->set($this->primaryKey, false);
+		}
+		return $this->data;
+	}
+  
+  function set($one, $two = null, $protectFields = true) {
+    if ($protectFields) {
+      if (!$one) {
+  			return;
+  		}
+  		if (is_object($one)) {
+  			$one = Set::reverse($one);
+  		}
+
+  		if (is_array($one)) {
+  		  if (empty($one[$this->alias])) {
+  				if ($this->getAssociated(key($one)) === null) {
+  					$one = array($this->alias => $one);
+  				}
+  			}
+  			foreach ($one as $alias => $data) {
+  			  if ($alias == $this->alias) {
+  			    $one[$alias] = $this->filterProtectedFields($data);
+  			  } else {
+    			  $associated = $this->getAssociated($alias);
+    			  if (!empty($associated)) {
+    			    $model = $associated['className'];
+    			    $one[$alias] = $this->$model->filterProtectedFields($data);
+    			  }
+  			  }
+  			}
+  		}
+		}
+		
     parent::set($one, $two);
   }
   

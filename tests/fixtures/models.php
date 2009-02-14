@@ -25,6 +25,18 @@ class User extends AppModel {
   );
 }
 
+class UserWithDefaults extends AppModel {
+  var $name = 'UserWithDefaults';
+  var $useTable = false;
+  var $_schema = array(
+    'login'    => array('type' => 'string'),
+    'password' => array('type' => 'string', 'default' => 'defaultpassword')
+  );
+  var $protectedFields = array(
+    'password'
+  );
+}
+
 class Profile extends AppModel {
   var $name = 'Profile';
   var $useTable = false;

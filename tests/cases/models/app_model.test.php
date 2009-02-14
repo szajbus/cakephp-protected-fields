@@ -5,11 +5,45 @@ class AppModelTest extends CakeTestCase {
   
   function startCase() {
     $this->User =& ClassRegistry::init('User');
+    $this->UserWithDefaults =& ClassRegistry::init('UserWithDefaults');
     $this->Article =& ClassRegistry::init('Article');
   }
   
-  function testProtectedFields() {
-    // simple
+  function startTest() {
+    $this->User->create();
+    $this->UserWithDefaults->create();
+    $this->Article->create();
+  }
+  
+  function testDoesNotProtectDefaultsOnCreate() {
+    $data = $this->UserWithDefaults->create();
+    
+    $expected = array(
+      'UserWithDefaults' => array(
+        'password' => 'defaultpassword'
+      )
+    );
+    $this->assertEqual($expected, $this->UserWithDefaults->data);
+  }
+  
+  function testProtectsFieldsOnCreate() {
+    $data = array(
+      'User' => array(
+        'login' => 'michal',
+        'password' => '123abc'
+      )
+    );
+    $this->User->create($data);
+    
+    $expected = array(
+      'User' => array(
+        'login' => 'michal'
+      )
+    );
+    $this->assertEqual($expected, $this->User->data);
+  }
+  
+  function testProtectsFieldsOnSet() {
     $data = array(
       'User' => array(
         'login' => 'michal',
@@ -17,16 +51,28 @@ class AppModelTest extends CakeTestCase {
       )
     );
     $this->User->set($data);
+    
     $expected = array(
       'User' => array(
         'login' => 'michal'
       )
     );
     $this->assertEqual($expected, $this->User->data);
+  }
+  
+  function testDoesNotProtectOnExplicitSet() {
     $this->User->set('password', '123abc');
-    $this->assertEqual($data, $this->User->data);
     
-    // multiple records
+    $expected = array(
+      'User' => array(
+        'password' => '123abc'
+      )
+    );
+    $this->assertEqual($expected, $this->User->data);
+  }
+  
+  function testProtectsMultipleRecord() {
+    $this->User->create(null);
     $data = array(
       'User' => array(
         array(
@@ -39,7 +85,7 @@ class AppModelTest extends CakeTestCase {
         )
       )
     );
-    $this->User->create();
+    
     $this->User->set($data);
     $expected = array(
       'User' => array(
@@ -52,8 +98,9 @@ class AppModelTest extends CakeTestCase {
       )
     );
     $this->assertEqual($expected, $this->User->data);
-    
-    // associated models (belongsTo)
+  }
+  
+  function testProtectsBelongsToAssociations() {
     $data = array(
       'User' => array(
         'login' => 'michal',
@@ -63,8 +110,9 @@ class AppModelTest extends CakeTestCase {
         'title' => 'some stuff',
         'body' => 'some text'
       )
-    );
+    );    
     $this->Article->set($data);
+    
     $expected = array(
       'User' => array(
         'login' => 'michal'
@@ -74,8 +122,9 @@ class AppModelTest extends CakeTestCase {
       )
     );
     $this->assertEqual($expected, $this->Article->data);
-    
-    // associated models (hasOne)
+  }
+  
+  function testProtectsHasOneAssociations() {
     $data = array(
       'User' => array(
         'login' => 'michal',
@@ -86,8 +135,8 @@ class AppModelTest extends CakeTestCase {
         'signature' => 'greetings'
       )
     );
-    $this->User->create();
     $this->User->set($data);
+    
     $expected = array(
       'User' => array(
         'login' => 'michal'
@@ -97,8 +146,9 @@ class AppModelTest extends CakeTestCase {
       )
     );
     $this->assertEqual($expected, $this->User->data);
-    
-    // associated models (hasMany)
+  }
+  
+  function testProtectsHasManyAssociations() {
     $data = array(
       'User' => array(
         'login' => 'michal',
@@ -117,6 +167,8 @@ class AppModelTest extends CakeTestCase {
         )
       )
     );
+    $this->User->set($data);
+    
     $expected = array(
       'User' => array(
         'login' => 'michal'
@@ -132,8 +184,7 @@ class AppModelTest extends CakeTestCase {
         )
       )
     );
-    $this->User->create();
-    $this->User->set($data);
+    
     $this->assertEqual($expected, $this->User->data);
   }
 }
